@@ -311,3 +311,55 @@ class StageSkillAvailablePoint:
         instance = _read_attr(self.skills, "instance", default=self.skills)
         points = _read_attr(instance, "available_skill_point", "availableSkillPoint", default=0)
         self.a_txt = str(points)
+
+
+@dataclass
+class StageSeletcBtn:
+    """Logic port of AS3 `StageSeletcBtn` (typo preserved from original).
+
+    Determines button enabled state from campaign/climax unlock rules and
+    performs stage selection transition to game main on click.
+    """
+
+    game_params: Any
+    game_constants: Any
+    stage_record: Any
+    goto_and_play: Any
+
+    stage_num: int = 0
+    enabled: bool = False
+
+    def set_stage_from_name(self, name: str) -> None:
+        """Parse stage number from names like `stage01` using AS indices."""
+        self.stage_num = int(name[5:7])
+
+    def refresh_enabled(self) -> None:
+        mode = _read_attr(self.game_params, "game_mode", "gameMode", default=0)
+        self.enabled = False
+
+        if mode & self.game_constants.GAME_MODE_CAMPAIN:
+            cleared = int(_read_attr(self.game_params, "cleard_stage_num", "cleardStageNum", default=-1))
+            if self.stage_num <= (cleared + 2):
+                self.enabled = True
+            return
+
+        all_stars = _call_first(self.stage_record, ("all_star_num_all_mode", "allStarNumAllMode"))
+        max_cleared = int(_read_attr(self.game_params, "max_cleard_stage_num", "maxCleardStageNum", default=-1))
+        if self.stage_num <= (all_stars / 3) and self.stage_num <= (max_cleared + 1):
+            self.enabled = True
+
+    def on_mouse_up(self) -> bool:
+        """Run click behavior; returns True when transition is performed."""
+        if not self.enabled:
+            return False
+
+        stage_value = self.stage_num - 1
+        if hasattr(self.game_params, "stage_num"):
+            self.game_params.stage_num = stage_value
+        else:
+            setattr(self.game_params, "stageNum", stage_value)
+
+        if callable(self.goto_and_play):
+            self.goto_and_play("gameMain")
+            return True
+        return False

@@ -3,6 +3,7 @@ import unittest
 from stage_select_widgets import (
     StageSelectBtnBase,
     StageSelectSurvivalBtn,
+    StageSeletcBtn,
     StageSelectSurvivalBtnBase,
     StageSkillAvailablePoint,
     StagesClimaxStar,
@@ -77,6 +78,13 @@ class _BtnConstants(_Constants):
 class _Skills:
     class instance:
         availableSkillPoint = 42
+
+
+
+class _StageRecordSeletcBtn:
+    @staticmethod
+    def all_star_num_all_mode():
+        return 18
 
 class _StageRecordSurvivalBase:
     SKILL_SCORE = {
@@ -186,6 +194,31 @@ class StageSelectWidgetsTest(unittest.TestCase):
         self.assertEqual(params.stageNum, -1)
         self.assertEqual(recorder.calls, [])
 
+
+
+    def test_stage_seletc_btn_campaign_enable_and_click(self):
+        params = type("P", (), {"gameMode": 0x10001, "cleardStageNum": 1})()
+        recorder = _GoToRecorder()
+        btn = StageSeletcBtn(params, _BtnConstants, _StageRecordSeletcBtn, recorder)
+        btn.set_stage_from_name("stage03")
+        btn.refresh_enabled()
+
+        self.assertTrue(btn.enabled)
+        self.assertTrue(btn.on_mouse_up())
+        self.assertEqual(getattr(params, "stageNum"), 2)
+        self.assertEqual(recorder.calls, ["gameMain"])
+
+    def test_stage_seletc_btn_climax_locked_by_star_gate(self):
+        params = type("P", (), {"gameMode": 2, "maxCleardStageNum": 10, "stageNum": -1})()
+        recorder = _GoToRecorder()
+        btn = StageSeletcBtn(params, _BtnConstants, _StageRecordSeletcBtn, recorder)
+        btn.set_stage_from_name("stage07")
+        btn.refresh_enabled()
+
+        self.assertFalse(btn.enabled)
+        self.assertFalse(btn.on_mouse_up())
+        self.assertEqual(params.stageNum, -1)
+        self.assertEqual(recorder.calls, [])
 
     def test_stage_skill_available_point_text(self):
         view = StageSkillAvailablePoint(_Skills)
