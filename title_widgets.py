@@ -92,3 +92,20 @@ class TitleCredistBtn:
         if not callable(goto):
             raise AttributeError("doc_root must expose instance.goto_and_play()/gotoAndPlay()")
         goto("credits")
+
+
+@dataclass
+class TitleDemoBtn:
+    """Logic port of AS3 `game.title.TitleDemoBtn`."""
+
+    doc_root: Any
+    super_called: bool = False
+
+    def on_mouse_up(self) -> None:
+        """Mirror `onMouseUpHandler`: super call + goto demo."""
+        self.super_called = True
+        instance = getattr(self.doc_root, "instance", self.doc_root)
+        goto = getattr(instance, "goto_and_play", None) or getattr(instance, "gotoAndPlay", None)
+        if not callable(goto):
+            raise AttributeError("doc_root must expose instance.goto_and_play()/gotoAndPlay()")
+        goto("demo")

@@ -1,6 +1,6 @@
 import unittest
 
-from title_widgets import SaveClearBtn, SaveConfirm, TitleCredistBtn
+from title_widgets import SaveClearBtn, SaveConfirm, TitleCredistBtn, TitleDemoBtn
 
 
 class _SaveConfirmCamel:
@@ -121,3 +121,23 @@ class TitleCredistBtnTest(unittest.TestCase):
 
         self.assertTrue(btn.super_called)
         self.assertEqual(_DocRootSnake.instance.calls, ["credits"])
+
+
+class TitleDemoBtnTest(unittest.TestCase):
+    def test_on_mouse_up_transitions_to_demo_camel(self):
+        _DocRootCamel.instance.calls = []
+        btn = TitleDemoBtn(_DocRootCamel)
+
+        btn.on_mouse_up()
+
+        self.assertTrue(btn.super_called)
+        self.assertEqual(_DocRootCamel.instance.calls, ["demo"])
+
+    def test_on_mouse_up_transitions_to_demo_snake(self):
+        _DocRootSnake.instance.calls = []
+        btn = TitleDemoBtn(_DocRootSnake)
+
+        btn.on_mouse_up()
+
+        self.assertTrue(btn.super_called)
+        self.assertEqual(_DocRootSnake.instance.calls, ["demo"])
