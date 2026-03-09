@@ -292,3 +292,22 @@ class StageSelectSurvivalBtnBase:
         stage_idx = self.stage_num - 1
         high_score = _call_first(self.stage_record, ("get_high_score", "getHighScore"), stage_idx)
         self.score_txt = str(high_score)
+
+
+@dataclass
+class StageSkillAvailablePoint:
+    """Logic port of AS3 `StageSkillAvailablePoint`.
+
+    Mirrors `a_txt.text = Skills.instance.availableSkillPoint.toString()`.
+    """
+
+    skills: Any
+    a_txt: str = ""
+
+    def __post_init__(self) -> None:
+        self.refresh()
+
+    def refresh(self) -> None:
+        instance = _read_attr(self.skills, "instance", default=self.skills)
+        points = _read_attr(instance, "available_skill_point", "availableSkillPoint", default=0)
+        self.a_txt = str(points)

@@ -4,6 +4,7 @@ from stage_select_widgets import (
     StageSelectBtnBase,
     StageSelectSurvivalBtn,
     StageSelectSurvivalBtnBase,
+    StageSkillAvailablePoint,
     StagesClimaxStar,
     StagesDifficulty,
 )
@@ -70,6 +71,12 @@ class _BtnConstants(_Constants):
 
 
 
+
+
+
+class _Skills:
+    class instance:
+        availableSkillPoint = 42
 
 class _StageRecordSurvivalBase:
     SKILL_SCORE = {
@@ -178,6 +185,11 @@ class StageSelectWidgetsTest(unittest.TestCase):
         self.assertFalse(btn.on_mouse_up())
         self.assertEqual(params.stageNum, -1)
         self.assertEqual(recorder.calls, [])
+
+
+    def test_stage_skill_available_point_text(self):
+        view = StageSkillAvailablePoint(_Skills)
+        self.assertEqual(view.a_txt, "42")
 
     def test_survival_btn_base_score_visible(self):
         params = type("P", (), {"gameMode": 2, "cleardStageNum": 1})()
