@@ -213,3 +213,43 @@ class StageSelectBtnBase:
 
         score_limit = cleared + 1
         self._set_score_and_flagship(self.stage_num <= score_limit)
+
+@dataclass
+class StageSelectSurvivalBtn:
+    """Logic port of AS3 `StageSelectSurvivalBtn`.
+
+    - Reads stage number from button instance name (`name.substr(6,2)`).
+    - Enables click only when stage is unlocked by `maxCleardStageNum + 1`.
+    - On click sets `GameParams.stageNum = stageNum - 1` and triggers transition to
+      `gameMain` via a callback.
+    """
+
+    game_params: Any
+    goto_and_play: Any
+
+    stage_num: int = 0
+    enabled: bool = False
+
+    def set_stage_from_name(self, name: str) -> None:
+        """Parse stage number from names like `button01` using AS indices."""
+        self.stage_num = int(name[6:8])
+
+    def refresh_enabled(self) -> None:
+        max_cleared = int(_read_attr(self.game_params, "max_cleard_stage_num", "maxCleardStageNum", default=-1))
+        self.enabled = self.stage_num <= (max_cleared + 1)
+
+    def on_mouse_up(self) -> bool:
+        """Run click behavior; returns True only when transition is performed."""
+        if not self.enabled:
+            return False
+
+        stage_value = self.stage_num - 1
+        if hasattr(self.game_params, "stage_num"):
+            self.game_params.stage_num = stage_value
+        else:
+            setattr(self.game_params, "stageNum", stage_value)
+
+        if callable(self.goto_and_play):
+            self.goto_and_play("gameMain")
+            return True
+        return False

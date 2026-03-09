@@ -1,6 +1,11 @@
 import unittest
 
-from stage_select_widgets import StageSelectBtnBase, StagesClimaxStar, StagesDifficulty
+from stage_select_widgets import (
+    StageSelectBtnBase,
+    StageSelectSurvivalBtn,
+    StagesClimaxStar,
+    StagesDifficulty,
+)
 
 
 class _Constants:
@@ -63,6 +68,15 @@ class _BtnConstants(_Constants):
     GAME_MODE_CAMPAIN = 0x10000
 
 
+
+
+class _GoToRecorder:
+    def __init__(self):
+        self.calls = []
+
+    def __call__(self, label: str):
+        self.calls.append(label)
+
 class StageSelectWidgetsTest(unittest.TestCase):
     def test_climax_star_totals(self):
         widget = StagesClimaxStar(_StageRecord, _Constants)
@@ -123,6 +137,30 @@ class StageSelectWidgetsTest(unittest.TestCase):
         self.assertEqual(btn.score_txt, "----")
         self.assertEqual(btn.flagship_txt, "----")
         self.assertEqual(btn.stars_frame, 1)
+
+    def test_survival_btn_enable_and_click(self):
+        params = type("P", (), {"maxCleardStageNum": 1})()
+        recorder = _GoToRecorder()
+        btn = StageSelectSurvivalBtn(params, recorder)
+        btn.set_stage_from_name("button02")
+        btn.refresh_enabled()
+
+        self.assertTrue(btn.enabled)
+        self.assertTrue(btn.on_mouse_up())
+        self.assertEqual(getattr(params, "stageNum"), 1)
+        self.assertEqual(recorder.calls, ["gameMain"])
+
+    def test_survival_btn_locked_no_transition(self):
+        params = type("P", (), {"maxCleardStageNum": 0, "stageNum": -1})()
+        recorder = _GoToRecorder()
+        btn = StageSelectSurvivalBtn(params, recorder)
+        btn.set_stage_from_name("button03")
+        btn.refresh_enabled()
+
+        self.assertFalse(btn.enabled)
+        self.assertFalse(btn.on_mouse_up())
+        self.assertEqual(params.stageNum, -1)
+        self.assertEqual(recorder.calls, [])
 
 
 if __name__ == "__main__":
