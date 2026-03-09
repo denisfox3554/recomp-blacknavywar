@@ -75,3 +75,20 @@ class SaveClearBtn:
         if not callable(in_out):
             raise AttributeError("save_confirm must expose instance.in_out()/inOut()")
         in_out()
+
+
+@dataclass
+class TitleCredistBtn:
+    """Logic port of AS3 `game.title.TitleCredistBtn` (typo preserved)."""
+
+    doc_root: Any
+    super_called: bool = False
+
+    def on_mouse_up(self) -> None:
+        """Mirror `onMouseUpHandler`: super call + goto credits."""
+        self.super_called = True
+        instance = getattr(self.doc_root, "instance", self.doc_root)
+        goto = getattr(instance, "goto_and_play", None) or getattr(instance, "gotoAndPlay", None)
+        if not callable(goto):
+            raise AttributeError("doc_root must expose instance.goto_and_play()/gotoAndPlay()")
+        goto("credits")
