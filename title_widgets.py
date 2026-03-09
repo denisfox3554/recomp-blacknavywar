@@ -2,8 +2,54 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
+
+
+@dataclass
+class SaveConfirm:
+    """Logic port of AS3 `game.title.SaveConfirm`.
+
+    AS3 behavior:
+    - constructor sets static `instance = this`
+    - on remove from stage sets `instance = null`
+    - `inOut()` transitions only from INIT or DISPLAY and calls
+      `gotoAndPlay("init")` or `gotoAndPlay("hide")` respectively, then moves
+      to MOVING state.
+    """
+
+    INIT: int = 0
+    MOVING: int = 1
+    DISPLAY: int = 2
+
+    instance: "SaveConfirm | None" = None
+
+    status: int = INIT
+    timeline_calls: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        type(self).instance = self
+
+    def on_remove(self) -> None:
+        """Mirror REMOVED_FROM_STAGE handler."""
+        type(self).instance = None
+
+    def goto_and_play(self, label: str) -> None:
+        """Record timeline transitions triggered by widget logic."""
+        self.timeline_calls.append(label)
+
+    def in_out(self) -> None:
+        """Python/snake_case alias for ActionScript `inOut()`."""
+        if self.status == self.INIT:
+            self.goto_and_play("init")
+            self.status = self.MOVING
+        elif self.status == self.DISPLAY:
+            self.goto_and_play("hide")
+            self.status = self.MOVING
+
+    def inOut(self) -> None:  # noqa: N802 - keep AS3-compatible method name
+        """AS3-compatible method name."""
+        self.in_out()
 
 
 @dataclass
