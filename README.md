@@ -1,0 +1,1 @@
+Here I will try to completely recompile the game code from one language to Python on AI by creating a native port of the 2D game and for now I am purely step-by-step functions and if of course it is purely an experiment, but nothing more
