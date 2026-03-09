@@ -1,1 +1,2 @@
 Here I will try to completely recompile the game code from one language to Python on AI by creating a native port of the 2D game and for now I am purely step-by-step functions and if of course it is purely an experiment, but nothing more
+If anyone needs to contribute, please join in because I just need functions without a full game, but it would be nice to experiment, but it would be a native port and not an emulator.
