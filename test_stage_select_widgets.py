@@ -3,6 +3,7 @@ import unittest
 from stage_select_widgets import (
     StageSelectBtnBase,
     StageSelectSurvivalBtn,
+    StageSelectSurvivalBtnBase,
     StagesClimaxStar,
     StagesDifficulty,
 )
@@ -67,6 +68,22 @@ class _StageRecordBtn:
 class _BtnConstants(_Constants):
     GAME_MODE_CAMPAIN = 0x10000
 
+
+
+
+class _StageRecordSurvivalBase:
+    SKILL_SCORE = {
+        2: [
+            [0, 100, 200],
+            [0, 150, 250],
+            [0, 200, 300],
+            [0, 250, 350],
+        ]
+    }
+
+    @staticmethod
+    def get_high_score(stage_idx: int):
+        return [1010, 2020, 3030, 4040][stage_idx]
 
 
 
@@ -161,6 +178,24 @@ class StageSelectWidgetsTest(unittest.TestCase):
         self.assertFalse(btn.on_mouse_up())
         self.assertEqual(params.stageNum, -1)
         self.assertEqual(recorder.calls, [])
+
+    def test_survival_btn_base_score_visible(self):
+        params = type("P", (), {"gameMode": 2, "cleardStageNum": 1})()
+        base = StageSelectSurvivalBtnBase(params, _StageRecordSurvivalBase)
+        base.set_stage_from_parent_name("button03")
+        base.refresh()
+
+        self.assertEqual(base.stage_txt, "3")
+        self.assertEqual(base.score_txt, "3030")
+
+    def test_survival_btn_base_score_hidden_when_locked(self):
+        params = type("P", (), {"gameMode": 2, "cleardStageNum": 0})()
+        base = StageSelectSurvivalBtnBase(params, _StageRecordSurvivalBase)
+        base.set_stage_from_parent_name("button04")
+        base.refresh()
+
+        self.assertEqual(base.stage_txt, "4")
+        self.assertEqual(base.score_txt, "----")
 
 
 if __name__ == "__main__":

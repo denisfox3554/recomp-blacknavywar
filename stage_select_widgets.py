@@ -253,3 +253,42 @@ class StageSelectSurvivalBtn:
             self.goto_and_play("gameMain")
             return True
         return False
+
+
+@dataclass
+class StageSelectSurvivalBtnBase:
+    """Logic port of AS3 `StageSelectSurvivalBtnBase`.
+
+    Reads stage index from parent button name (`parent.name.substr(6,2)`),
+    writes stage label text, and exposes score visibility/value according to
+    survival unlock progression.
+    """
+
+    game_params: Any
+    stage_record: Any
+
+    stage_num: int = 0
+    stage_txt: str = ""
+    score_txt: str = "----"
+
+    def set_stage_from_parent_name(self, parent_name: str) -> None:
+        """Parse stage number from names like `button01` using AS indices."""
+        self.stage_num = int(parent_name[6:8])
+        self.stage_txt = str(self.stage_num)
+
+    def refresh(self) -> None:
+        mode = _read_attr(self.game_params, "game_mode", "gameMode")
+        cleared = int(_read_attr(self.game_params, "cleard_stage_num", "cleardStageNum", default=-1))
+
+        # AS reads this row but does not use it in final UI assignments.
+        skill_score = _read_attr(self.stage_record, "SKILL_SCORE", "skill_score", default={})
+        mode_rows = skill_score.get(mode, []) if hasattr(skill_score, 'get') else []
+        _ = mode_rows[self.stage_num - 1] if 0 < self.stage_num <= len(mode_rows) else None
+
+        if self.stage_num > (cleared + 2):
+            self.score_txt = "----"
+            return
+
+        stage_idx = self.stage_num - 1
+        high_score = _call_first(self.stage_record, ("get_high_score", "getHighScore"), stage_idx)
+        self.score_txt = str(high_score)
